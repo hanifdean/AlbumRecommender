@@ -14,7 +14,6 @@ if(len(sys.argv) < 3):
 cred_manager = SpotifyClientCredentials(client_id=sys.argv[1], client_secret=sys.argv[2])
 sp = spotipy.Spotify(client_credentials_manager=cred_manager)
 
-outF = open('data.txt', 'w')
 
 MAX_LOOP = 1000
 i = 0
@@ -44,5 +43,3 @@ while(i >= 0):
 
     if(i > MAX_LOOP):
         i = -1
-
-outF.close()
