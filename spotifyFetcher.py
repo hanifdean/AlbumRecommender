@@ -1,12 +1,13 @@
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import sys
+from time import sleep
 
 
-YEAR = '2018'
+YEAR = '2010'
 TARGET_ALBUMS_NUM = 7000
-OUTPUT_FILE = 'dataset-7k-2018.txt'
-LOG_FILE = 'removed-2018.txt'
+OUTPUT_FILE = 'dataset-7k-2010.txt'
+LOG_FILE = 'removed-2010.txt'
 
 
 if(len(sys.argv) < 3):
@@ -16,16 +17,35 @@ if(len(sys.argv) < 3):
     sys.exit()
 
 
+
+def loopAndTry(func, debug, *args, **kwargs):
+
+    loop = 1
+
+    while(loop <= 10):
+        try:
+            return func(*args, **kwargs)
+        except:
+            print(debug)
+            print("RETRYING AFTER %d MINUTES" % (loop * 5))
+            sleep(loop * 300)
+            loop += 1
+
+    print("ERROR REQUESTING THE DATA FOR 10 TIMES")
+    sys.exit()
+
+
+
 cred_manager = SpotifyClientCredentials(client_id=sys.argv[1], client_secret=sys.argv[2])
 sp = spotipy.Spotify(client_credentials_manager=cred_manager)
 
 oF = open(OUTPUT_FILE, 'w')
-lF = open(LOG_FILE, 'a')
+lF = open(LOG_FILE, 'w')
 
 allAlbums = []
 
 
-results = sp.search(q='* year:' + YEAR, type='album')
+results = loopAndTry(sp.search, "CONNECTION REFUSED WHEN REQUESTING FOR ALBUMS", q='* year:' + YEAR, type='album')
 while(results):
     print('Number of albums recorded:', len(allAlbums), end='\r')
 
@@ -39,17 +59,17 @@ while(results):
         if((album_name, album_id) not in allAlbums):
             allAlbums.append((album_name, album_id))
 
-            r2 = sp.album_tracks(album_id)
+            r2 = loopAndTry(sp.album_tracks, "CONNECTION REFUSED WHEN REQUESTING FOR ALBUM TRACKS", album_id)
             while(r2):
                 for track in r2['items']:
                     track_name = track['name']
                     track_id = track['id']
 
-                    features = sp.audio_features([track_id])[0]
+                    features = loopAndTry(sp.audio_features, "CONNECTION REFUSED WHEN REQUESTING FOR AUDIO FEATURES", [track_id])[0]
                     removed = False
                     if(features is None):
                         for r in range(10):
-                            features = sp.audio_features([track_id])[0]
+                            features = loopAndTry(sp.audio_features, "CONNECTION REFUSED WHEN REQUESTING FOR AUDIO FEATURES", [track_id])[0]
                             if(features is None):
                                 if(r == 9):
                                     lF.write('%s\t%s\t%s\t%s\n' % (album_id, album_name, track_id, track_name))
@@ -79,7 +99,7 @@ while(results):
                         features['liveness'], features['loudness'], features['mode'], features['speechiness'], features['tempo'], features['time_signature'], features['valence']))
 
                 if(r2['next']):
-                    r2 = sp.next(r2)
+                    r2 = loopAndTry(sp.next, "CONNECTION REFUSED WHEN REQUESTING FOR THE NEXT ALBUM TRACKS", r2)
                 else:
                     r2 = None
 
@@ -88,7 +108,7 @@ while(results):
                 break
 
     if(results['albums']['next']):
-        results = sp.next(results['albums'])
+        results = loopAndTry(sp.next, "CONNECTION REFUSED WHEN REQUESTING FOR THE NEXT ALBUMS", results['albums'])
     else:
         results = None
 
