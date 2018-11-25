@@ -68,37 +68,31 @@ for i in range(len(clusters)):
         if(not second):
             for r in data:
                 if(r[0] == clusters[i][0][0]):
-                    m2.append(r[9])
-                    print(r[9])
+                    m2.append(float(r[4]))
                 elif(r[0] == clusters[i][1][0]):
-                    n2.append(r[9])
-                    print(r[9])
+                    n2.append(float(r[4]))
                 elif(r[0] == clusters[i][2][0]):
-                    o2.append(r[9])
-                    print(r[9])
+                    o2.append(float(r[4]))
         else:
             for r in data:
                 if(r[0] == clusters[i][0][0]):
-                    m.append(r[9])
-                    print(r[9])
+                    m.append(float(r[4]))
                 elif(r[0] == clusters[i][1][0]):
-                    n.append(r[9])
-                    print(r[9])
+                    n.append(float(r[4]))
                 elif(r[0] == clusters[i][2][0]):
-                    o.append(r[9])
-                    print(r[9])
+                    o.append(float(r[4]))
 
         if(second):
-            axs[0].plot([ t for t in range(12)], m,
+            axs[0].plot([ t for t in range(12) ], m,
                 [ t for t in range(12) ], n,
                 [ t for t in range(12) ], o)
             axs[0].set_xlabel('Track position [Cluster 1]')
-            axs[0].set_ylabel('Feature')
+            axs[0].set_ylabel('Acousticness')
             axs[1].plot([ t for t in range(12)], m2,
                 [ t for t in range(12) ], n2,
                 [ t for t in range(12) ], o2)
             axs[1].set_xlabel('Track position [Cluster 2]')
-            axs[1].set_ylabel('Feature')
+            axs[1].set_ylabel('Acousticness')
             plt.show()
             sys.exit()
 
