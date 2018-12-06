@@ -11,7 +11,7 @@ from pyspark.ml.linalg import Vectors
 from pyspark.ml.evaluation import ClusteringEvaluator
 from pyspark.ml.clustering import KMeans, KMeansModel
 from pyspark.ml.feature import VectorAssembler
-from pyspark.sql import SQLContext as sqlContext
+from pyspark.sql import SQLContext
 
 import numpy as np
 import pandas as pd
@@ -23,7 +23,7 @@ import math
 # MAGIC ## Variable Initialization
 
 # COMMAND ----------
-
+sqlContext = sql.SQLContext(sc)
 FEAT_NUM = 13
 FIXED_TRACK_NUM = 24
 FIRST_FILE = '/home/ec2-user/AlbumRecommender/dataset-7k-2010.txt'
