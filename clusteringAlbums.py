@@ -11,6 +11,7 @@ from pyspark.ml.linalg import Vectors
 from pyspark.ml.evaluation import ClusteringEvaluator
 from pyspark.ml.clustering import KMeans, KMeansModel
 from pyspark.ml.feature import VectorAssembler
+from pyspark.sql import SQLContext as sqlContext
 
 import numpy as np
 import pandas as pd
@@ -62,12 +63,12 @@ def loadFileAsList(path):
 
 def interpolateRow(row):
   finalRow = [row.AI_AN, [ [ np.nan for _ in range(FEAT_NUM) ] for _ in range(FIXED_TRACK_NUM) ]]
-  
+
   # For each feature type
   for i in range(FEAT_NUM):
-    
+
     tempFeatures = []
-    
+
     # Divide case to albums with single track and multiple tracks
     # to avoid 'Division by zero' exception
     # If multiple tracks
@@ -75,7 +76,7 @@ def interpolateRow(row):
       interSpace = int(math.floor(((FIXED_TRACK_NUM - len(row.FTS)) / (len(row.FTS) - 1))))
       print interSpace
       additionalSpace = (FIXED_TRACK_NUM - len(row.FTS)) % (len(row.FTS) - 1)
-    
+
       ## Value and NaN placements
       # For each list of track features
       for j in row.FTS:
@@ -85,21 +86,21 @@ def interpolateRow(row):
         if additionalSpace > 0:
           tempFeatures.append(np.nan)
           additionalSpace -= 1
-    
+
     # If single track
     else:
       tempFeatures.append(row.FTS[0][i])
       for n in range(FIXED_TRACK_NUM - 1):
         tempFeatures.append(np.nan)
-    
+
     ## Interpolate
     tempFeatures = pd.Series(tempFeatures)
     tempFeatures = tempFeatures.interpolate()
-    
+
     ## Assign Back
     for j in range(FIXED_TRACK_NUM):
       finalRow[1][j][i] = tempFeatures[j]
-  
+
   return finalRow
 
 # COMMAND ----------
@@ -212,5 +213,3 @@ transformed.drop('features').rdd.map(stringify).saveAsTextFile(SAVE_ALBUM_CLUSTE
 transformed.groupBy('cluster_num').agg(collect_list('id').alias('albums_list')).rdd.map(stringifyList).saveAsTextFile(SAVE_CLUSTER_ALBUM_FILE)
 
 # COMMAND ----------
-
-
