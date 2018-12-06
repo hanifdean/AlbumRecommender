@@ -12,7 +12,7 @@ from pyspark.ml.evaluation import ClusteringEvaluator
 from pyspark.ml.clustering import KMeans, KMeansModel
 from pyspark.ml.feature import VectorAssembler
 from pyspark.sql import SQLContext
-from pyspark import SparkContext
+from pyspark import SparkContext, SparkConf
 import numpy as np
 import pandas as pd
 import math
@@ -23,7 +23,8 @@ import math
 # MAGIC ## Variable Initialization
 
 # COMMAND ----------
-sc = SparkContext('spark://ec2-100-24-35-241.compute-1.amazonaws.com:7077')
+conf = SparkConf().setMaster('spark://ec2-100-24-35-241.compute-1.amazonaws.com:7077')
+sc = SparkContext(conf = conf)
 sqlContext = SQLContext(sc)
 FEAT_NUM = 13
 FIXED_TRACK_NUM = 24
