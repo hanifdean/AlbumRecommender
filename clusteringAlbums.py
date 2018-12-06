@@ -12,7 +12,6 @@ from pyspark.ml.evaluation import ClusteringEvaluator
 from pyspark.ml.clustering import KMeans, KMeansModel
 from pyspark.ml.feature import VectorAssembler
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import math
