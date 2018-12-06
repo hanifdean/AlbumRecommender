@@ -12,7 +12,7 @@ from pyspark.ml.evaluation import ClusteringEvaluator
 from pyspark.ml.clustering import KMeans, KMeansModel
 from pyspark.ml.feature import VectorAssembler
 from pyspark.sql import SQLContext
-
+from pyspark import SparkContext
 import numpy as np
 import pandas as pd
 import math
@@ -23,7 +23,8 @@ import math
 # MAGIC ## Variable Initialization
 
 # COMMAND ----------
-sqlContext = sql.SQLContext(sc)
+sc = SparkContext('spark://ec2-100-24-35-241.compute-1.amazonaws.com:7077')
+sqlContext = SQLContext(sc)
 FEAT_NUM = 13
 FIXED_TRACK_NUM = 24
 FIRST_FILE = '/home/ec2-user/AlbumRecommender/dataset-7k-2010.txt'
