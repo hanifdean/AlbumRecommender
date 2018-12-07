@@ -9,6 +9,8 @@ from pyspark.sql.types import *
 from pyspark.sql.functions import *
 from pyspark.ml.linalg import Vectors
 from pyspark.ml.evaluation import ClusteringEvaluator
+from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+from pyspark.ml import Pipeline
 from pyspark.ml.clustering import KMeans, KMeansModel
 from pyspark.ml.feature import VectorAssembler
 from pyspark.sql import SQLContext
@@ -23,7 +25,7 @@ import math
 # MAGIC ## Variable Initialization
 
 # COMMAND ----------
-conf = SparkConf().setMaster('spark://ec2-100-24-35-241.compute-1.amazonaws.com:7077')
+conf = SparkConf().setMaster('spark://ec2-52-23-167-89.compute-1.amazonaws.com:7077')
 sc = SparkContext(conf = conf)
 sqlContext = SQLContext(sc)
 FEAT_NUM = 13
@@ -38,8 +40,8 @@ FILENAMES = ['/home/ec2-user/AlbumRecommender/dataset-7k-2011.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2017.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2018.txt'
             ]
-SAVE_ALBUM_CLUSTER_FILE = 's3a://4651/withAlbumAsKey'
-SAVE_CLUSTER_ALBUM_FILE = 's3a://4651/withClusterAsKey'
+SAVE_ALBUM_CLUSTER_FILE = 's3a://album-recommender-bucket/withAlbumAsKey'
+SAVE_CLUSTER_ALBUM_FILE = 's3a://album-recommender-bucket/withClusterAsKey'
 albumSchema = StructType([ \
     StructField("AI", StringType()), \
     StructField("AN", StringType()), \
@@ -64,7 +66,7 @@ def loadFileAsList(path):
 # COMMAND ----------
 
 def interpolateRow(row):
-  finalRow = [row.AI_AN, [ [ np.nan for _ in range(FEAT_NUM) ] for _ in range(FIXED_TRACK_NUM) ]]
+  finalRow = [row.AN_AI, [ [ np.nan for _ in range(FEAT_NUM) ] for _ in range(FIXED_TRACK_NUM) ]]
 
   # For each feature type
   for i in range(FEAT_NUM):
@@ -123,8 +125,8 @@ def stringify(data):
 
 finalAlbums = (sqlContext
                .createDataFrame(loadFileAsList(FIRST_FILE), albumSchema)
-               .withColumn("AI_AN",concat(col("AI"), lit("_"), col("AN")))
-               .groupBy("AI_AN")
+               .withColumn("AN_AI",concat(col("AN"), lit("_"), col("AI")))
+               .groupBy("AN_AI")
                .agg(collect_list('FTS').alias('FTS'))
                .filter(size('FTS') <= FIXED_TRACK_NUM)
                .rdd.map(interpolateRow)
@@ -133,8 +135,8 @@ finalAlbums = (sqlContext
 for fn in FILENAMES:
   df = (sqlContext
                .createDataFrame(loadFileAsList(fn), albumSchema)
-               .withColumn("AI_AN",concat(col("AI"), lit("_"), col("AN")))
-               .groupBy("AI_AN")
+               .withColumn("AN_AI",concat(col("AN"), lit("_"), col("AI")))
+               .groupBy("AN_AI")
                .agg(collect_list('FTS').alias('FTS'))
                .filter(size('FTS') <= FIXED_TRACK_NUM)
                .rdd.map(interpolateRow))
@@ -178,8 +180,20 @@ df = sqlContext.createDataFrame(finalAlbums.map(getDiff), ['id', 'features'])
 
 # COMMAND ----------
 
-kmeans = KMeans(k=7000, seed=1)
-model = kmeans.fit(df.select('features'))
+kmeans = KMeans(distanceMeasure='cosine')
+pipeline = Pipeline(stages=[kmeans,])
+
+paramGrid = (ParamGridBuilder()
+             .addGrid(kmeans.k, [50, 100, 200, 500, 1000, 2000, 4000, 7000])
+             .build())
+
+crossval = CrossValidator(estimator=pipeline,
+                          estimatorParamMaps=paramGrid,
+                          evaluator=ClusteringEvaluator(distanceMeasure='cosine'),
+                          numFolds=3)
+
+# Run cross-validation, and choose the best set of parameters.
+cvModel = crossval.fit(df)
 
 # COMMAND ----------
 
@@ -191,23 +205,21 @@ model = kmeans.fit(df.select('features'))
 def stringifyList(data):
   row = str(data[0])
   for x in data[1]:
-    tabDelim = '\t%f'+x
-    row+=tabDelim
+    row += '\t%s' % x
   return row
 
 # COMMAND ----------
 
 def stringify(data):
-  row = data[0]+'\t%f'+str(data[1])
+  row = data[0] + '\t%d' % data[1]
   return row
 
 # COMMAND ----------
 
-transformed = model.transform(df).withColumnRenamed('prediction','cluster_num')
+transformed = cvModel.transform(df).withColumnRenamed('prediction','cluster_num')
 
 # COMMAND ----------
 
-transformed = model.transform(df).withColumnRenamed('prediction','cluster_num')
 transformed.drop('features').rdd.map(stringify).coalesce(1).saveAsTextFile(SAVE_ALBUM_CLUSTER_FILE)
 
 # COMMAND ----------
