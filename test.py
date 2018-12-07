@@ -38,8 +38,8 @@ FILENAMES = ['/home/ec2-user/AlbumRecommender/dataset-7k-2011.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2017.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2018.txt'
             ]
-SAVE_ALBUM_CLUSTER_FILE = '/home/ec2-user/AlbumRecommender/albumKey'
-SAVE_CLUSTER_ALBUM_FILE = '/home/ec2-user/AlbumRecommender/clusterKey'
+SAVE_ALBUM_CLUSTER_FILE = 's3a://4651/albumKey'
+SAVE_CLUSTER_ALBUM_FILE = 'file:///home/ec2-user/AlbumRecommender/clusterKey'
 albumSchema = StructType([ \
     StructField("AI", StringType()), \
     StructField("AN", StringType()), \
@@ -208,10 +208,10 @@ transformed = model.transform(df).withColumnRenamed('prediction','cluster_num')
 # COMMAND ----------
 
 transformed = model.transform(df).withColumnRenamed('prediction','cluster_num')
-transformed.drop('features').rdd.map(stringify).coalesce(1).saveAsTextFile(SAVE_ALBUM_CLUSTER_FILE)
+transformed.drop('features').rdd.saveAsTextFile(SAVE_ALBUM_CLUSTER_FILE)
 
 # COMMAND ----------
 
-transformed.groupBy('cluster_num').agg(collect_list('id').alias('albums_list')).rdd.map(stringifyList).coalesce(1).saveAsTextFile(SAVE_CLUSTER_ALBUM_FILE)
+#transformed.groupBy('cluster_num').agg(collect_list('id').alias('albums_list')).rdd.map(stringifyList).toLocalIterator().saveAsTextFile(SAVE_CLUSTER_ALBUM_FILE)
 
 # COMMAND ----------

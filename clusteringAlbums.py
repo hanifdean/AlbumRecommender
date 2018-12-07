@@ -38,8 +38,8 @@ FILENAMES = ['/home/ec2-user/AlbumRecommender/dataset-7k-2011.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2017.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2018.txt'
             ]
-SAVE_ALBUM_CLUSTER_FILE = '/home/ec2-user/AlbumRecommender/albumKey.tsv'
-SAVE_CLUSTER_ALBUM_FILE = '/home/ec2-user/AlbumRecommender/clusterKey.tsv'
+SAVE_ALBUM_CLUSTER_FILE = 's3a://4651/withAlbumAsKey'
+SAVE_CLUSTER_ALBUM_FILE = 's3a://4651/withClusterAsKey'
 albumSchema = StructType([ \
     StructField("AI", StringType()), \
     StructField("AN", StringType()), \
