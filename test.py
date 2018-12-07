@@ -38,8 +38,8 @@ FILENAMES = ['/home/ec2-user/AlbumRecommender/dataset-7k-2011.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2017.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2018.txt'
             ]
-SAVE_ALBUM_CLUSTER_FILE = '/home/ec2-user/AlbumRecommender/albumKey.tsv'
-SAVE_CLUSTER_ALBUM_FILE = '/home/ec2-user/AlbumRecommender/clusterKey.tsv'
+SAVE_ALBUM_CLUSTER_FILE = '/home/ec2-user/AlbumRecommender/albumKey'
+SAVE_CLUSTER_ALBUM_FILE = '/home/ec2-user/AlbumRecommender/clusterKey'
 albumSchema = StructType([ \
     StructField("AI", StringType()), \
     StructField("AN", StringType()), \
@@ -130,15 +130,15 @@ finalAlbums = (sqlContext
                .rdd.map(interpolateRow)
                .cache())
 
-for fn in FILENAMES:
-  df = (sqlContext
-               .createDataFrame(loadFileAsList(fn), albumSchema)
-               .withColumn("AI_AN",concat(col("AI"), lit("_"), col("AN")))
-               .groupBy("AI_AN")
-               .agg(collect_list('FTS').alias('FTS'))
-               .filter(size('FTS') <= FIXED_TRACK_NUM)
-               .rdd.map(interpolateRow))
-  finalAlbums = finalAlbums.union(df).cache()
+# for fn in FILENAMES:
+#   df = (sqlContext
+#                .createDataFrame(loadFileAsList(fn), albumSchema)
+#                .withColumn("AI_AN",concat(col("AI"), lit("_"), col("AN")))
+#                .groupBy("AI_AN")
+#                .agg(collect_list('FTS').alias('FTS'))
+#                .filter(size('FTS') <= FIXED_TRACK_NUM)
+#                .rdd.map(interpolateRow))
+#   finalAlbums = finalAlbums.union(df).cache()
 
 # COMMAND ----------
 
@@ -178,7 +178,7 @@ df = sqlContext.createDataFrame(finalAlbums.map(getDiff), ['id', 'features'])
 
 # COMMAND ----------
 
-kmeans = KMeans(k=7000, seed=1)
+kmeans = KMeans(k=2, seed=1)
 model = kmeans.fit(df.select('features'))
 
 # COMMAND ----------
