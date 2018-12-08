@@ -180,20 +180,22 @@ df = sqlContext.createDataFrame(finalAlbums.map(getDiff), ['id', 'features'])
 
 # COMMAND ----------
 
-kmeans = KMeans(distanceMeasure='cosine')
-pipeline = Pipeline(stages=[kmeans,])
+k_list = [500, 1000, 3000, 7000]
+best_model = 0
+best_score = -99
+final_df = 0
+evaluator = ClusteringEvaluator()
 
-paramGrid = (ParamGridBuilder()
-             .addGrid(kmeans.k, [50, 100, 200, 500, 1000, 2000, 4000, 7000])
-             .build())
+for c in k_list:
+  kmeans = KMeans()
+  curr_model = kmeans.fit(df)
+  curr_res = curr_model.transform(df)
+  curr_score = evaluator.evaluate(curr_res)
+  if curr_score > best_score:
+      best_model = curr_model
+      best_score = curr_score
+      final_df = curr_res
 
-crossval = CrossValidator(estimator=pipeline,
-                          estimatorParamMaps=paramGrid,
-                          evaluator=ClusteringEvaluator(distanceMeasure='cosine'),
-                          numFolds=3)
-
-# Run cross-validation, and choose the best set of parameters.
-cvModel = crossval.fit(df)
 
 # COMMAND ----------
 
@@ -216,7 +218,7 @@ def stringify(data):
 
 # COMMAND ----------
 
-transformed = cvModel.transform(df).withColumnRenamed('prediction','cluster_num')
+transformed = final_df.withColumnRenamed('prediction','cluster_num')
 
 # COMMAND ----------
 
