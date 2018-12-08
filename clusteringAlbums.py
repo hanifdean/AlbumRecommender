@@ -25,7 +25,7 @@ import math
 # MAGIC ## Variable Initialization
 
 # COMMAND ----------
-conf = SparkConf().setMaster('spark://ec2-52-23-167-89.compute-1.amazonaws.com:7077')
+conf = SparkConf().setMaster('spark://ec2-54-174-215-55.compute-1.amazonaws.com:7077')
 sc = SparkContext(conf = conf)
 sqlContext = SQLContext(sc)
 FEAT_NUM = 13
@@ -40,8 +40,8 @@ FILENAMES = ['/home/ec2-user/AlbumRecommender/dataset-7k-2011.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2017.txt',
              '/home/ec2-user/AlbumRecommender/dataset-7k-2018.txt'
             ]
-SAVE_ALBUM_CLUSTER_FILE = 's3a://album-recommender-bucket/withAlbumAsKey'
-SAVE_CLUSTER_ALBUM_FILE = 's3a://album-recommender-bucket/withClusterAsKey'
+SAVE_ALBUM_CLUSTER_FILE = 's3a://album-recommender-bucket1/withAlbumAsKey'
+SAVE_CLUSTER_ALBUM_FILE = 's3a://album-recommender-bucket1/withClusterAsKey'
 albumSchema = StructType([ \
     StructField("AI", StringType()), \
     StructField("AN", StringType()), \
