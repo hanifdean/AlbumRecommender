@@ -1,0 +1,58 @@
+extends layout
+
+block content
+  h3 This is what your album is similar to:
+  #placeholder
+  
+
+
+  script(src='https://www.gstatic.com/firebasejs/5.6.0/firebase.js')
+  script(src='https://www.gstatic.com/firebasejs/5.6.0/firebase-app.js')
+  script(src='https://www.gstatic.com/firebasejs/5.6.0/firebase-database.js')
+  
+  
+  script.
+    var config = {
+      apiKey: "AIzaSyC--zIcAWQRO1sGqQewA6qVAXNfSv0YUuA",
+      authDomain: "spotify-album-recommender.firebaseapp.com",
+      databaseURL: "https://spotify-album-recommender.firebaseio.com",
+      projectId: "spotify-album-recommender",
+      storageBucket: "spotify-album-recommender.appspot.com",
+      messagingSenderId: "509103060745"
+    };
+    firebase.initializeApp(config);
+    var database = firebase.database();
+
+    function clickAlbum(albumId, clusterId) {
+      document.getElementById('albumId').value = albumId;
+      document.getElementById('clusterId').value = clusterId;
+      document.getElementById('albumForm').submit();
+    }
+    var passed_album_id = "#{albumId}";
+    var e = document.createElement('div');
+    e.innerHTML = passed_album_id;
+    var passed_album_id = e.childNodes[0].nodeValue;
+    var clusterId = "#{clusterId}";
+
+    function searchSimilar() {
+      document.getElementById('placeholder').innerHTML = '';
+      database.ref('clusters/' + clusterId).limitToFirst(10).once('value').then(function(snapshot) {
+        if(!snapshot.hasChildren()) document.getElementById('placeholder').innerHTML += '<p>Not found</p>';
+        snapshot.forEach(function(childSnapshot) {
+          var albumId = childSnapshot.val();
+          console.log(albumId);
+          console.log(passed_album_id);
+          if(albumId === passed_album_id) return;
+          var albumName = albumId.split('_')[0];
+          database.ref('albums/' + albumId).once('value').then(function(albumSnapshot) {
+            var artistName = albumSnapshot.val()['artist'];
+            var img_url = albumSnapshot.val()['img_url'];
+            var url = albumSnapshot.val()['url'];
+            document.getElementById('placeholder').innerHTML += '<p><a href="' + url + '">' + albumName + ' By: ' + artistName + '</a></p>';
+            document.getElementById('placeholder').innerHTML += '<a href="' + url + '"><img src="' + img_url + '" width="200px" height="200px"/></a>'
+          });
+        });
+      });
+    } 
+
+    window.onload = searchSimilar;
