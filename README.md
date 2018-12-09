@@ -4,4 +4,5 @@ To run the server:
 1. Go to /AlbumRecommender/server/server folder
 2. Run 'npm install'
 3. Run 'npm start'
-4. Then go to 'localhost:3000' in your browser
+4. Go to 'localhost:3000' in your browser
+5. Finally, search the album name in the input box
