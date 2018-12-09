@@ -1,13 +1,11 @@
 extends layout
 
 block content
-  h1(class='h1-dark')= title
-  h1(class='h1-light') For You
+  h1= title
   br
-  div(class='input-group input-group-large')
-    input(id='albumName', name='albumName', class='form-control', type='text', placeholder='Type an album that inspires you' oninput='dbSearch()')
-    div(class='input-group-append')
-      button(type='button', class='btn btn-outline-secondary') Search
+  p Find similar albums by searching below
+  p Album Name: 
+    input(id='albumName', name='albumName', type='text', oninput='dbSearch()')
   br
   form#albumForm(action='/cluster', method='post')
     input#albumId(name='albumId', type='hidden')
@@ -19,8 +17,8 @@ block content
   script(src='https://www.gstatic.com/firebasejs/5.6.0/firebase.js')
   script(src='https://www.gstatic.com/firebasejs/5.6.0/firebase-app.js')
   script(src='https://www.gstatic.com/firebasejs/5.6.0/firebase-database.js')
-
-
+  
+  
   script.
     var config = {
       apiKey: "AIzaSyC--zIcAWQRO1sGqQewA6qVAXNfSv0YUuA",
@@ -34,7 +32,7 @@ block content
     var database = firebase.database();
 
     var dbSearch = _.debounce(searchFr, 500);
-
+  
     function clickAlbum(albumId, clusterId) {
       document.getElementById('albumId').value = albumId;
       document.getElementById('clusterId').value = clusterId;
@@ -57,4 +55,5 @@ block content
           document.getElementById('placeholder').innerHTML += '<p><a href="#" onclick="clickAlbum(' + "'" + albumId + "'" + ', ' + clusterId + ')">' + albumName + ' By: ' + artistName + '</a></p>';
         });
       });
-    }
+    } 
+
