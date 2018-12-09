@@ -7,7 +7,7 @@ router.post('/cluster', function(req, res, next) {
 });
 
 router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Album Recommender' });
+  res.render('index', { title: 'Albums' });
 });
 
 module.exports = router;
