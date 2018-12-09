@@ -1,8 +1,8 @@
 ### SPOTIFY ALBUM RECOMMENDER (COMP4651 Project)
 By: 
-Gabriela, Petra
-Kosasih, Angelica
-Nadhif, Mohammad Hanif Dean
+* Gabriela, Petra
+* Kosasih, Angelica
+* Nadhif, Mohammad Hanif Dean
 
 #### INSTRUCTIONS TO RUN
 
