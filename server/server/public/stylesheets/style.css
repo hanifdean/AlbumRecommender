@@ -1,6 +1,6 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+html body {
+  /* font: 14px "Lucida Grande", Helvetica, Arial, sans-serif; */
+  background-color: #F8F9FA;
 }
 
 a {
@@ -11,14 +11,33 @@ h1 {
 }
 p {
   font-family: 'Roboto', sans-serif;
-  font-size: calc(10px + 1vw);
+  font-size: calc(10px + 0.4vw);
+}
+
+.nav-custom {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 12px;
+  font-weight: bold;
+}
+.nav-link {
+  vertical-align: middle;
+}
+
+.github {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  margin: auto;
 }
 
 .center-search {
+  margin-top: 20vh;
   margin-left: auto;
   margin-right: auto;
   justify-content: center;
   max-width: 700px;
+  text-align: center;
+  padding: 15px;
 }
 
 .h1-dark {
